@@ -4,7 +4,7 @@
 
 ## Machinery
 
-Machinery is an asynchronous task queue/job queue based on distributed message passing.
+Machinery 是一种基于分布式消息传递的异步任务队列/作业队列。
 
 [![Travis Status for RichardKnop/machinery](https://travis-ci.org/RichardKnop/machinery.svg?branch=master&label=linux+build)](https://travis-ci.org/RichardKnop/machinery)
 [![godoc for RichardKnop/machinery](https://godoc.org/github.com/nathany/looper?status.svg)](http://godoc.org/github.com/RichardKnop/machinery/v1)
@@ -59,11 +59,11 @@ Machinery is an asynchronous task queue/job queue based on distributed message p
 
 ### V2 Experiment
 
-Please be advised that V2 is work in progress and breaking changes can and will happen until it is ready.
+请注意，V2 的工作正在进行中，在准备就绪之前，可能也将发生破坏性的更改。
 
-You can use the current V2 in order to avoid having to import all dependencies for brokers and backends you are not using.
+您可以使用当前的 V2，以避免必须导入未使用的代理和后端的所有依赖项。
 
-Instead of factory, you will need to inject broker and backend objects to the server constructor:
+不是工厂，你需要注入代理和后端对象到服务器构造函数:
 
 ```go
 import (
@@ -80,23 +80,25 @@ server := machinery.NewServer(cnf, broker, backend, lock)
 // server.NewWorker("machinery", 10)
 ```
 
-### First Steps
+### 第一步
 
-Add the Machinery library to your $GOPATH/src:
+将 Machinery 库添加到 $GOPATH/src：
 
 ```sh
 go get github.com/RichardKnop/machinery/v1
 ```
 
-Or to get experimental v2 release:
+或获得实验性 v2 版本：
 
 ```sh
 go get github.com/RichardKnop/machinery/v2
 ```
 
-First, you will need to define some tasks. Look at sample tasks in `example/tasks/tasks.go` to see a few examples.
 
-Second, you will need to launch a worker process with one of these commands (v2 is recommended since it doesn't import dependencies for all brokers / backends, only those you actually need):
+首先，您需要定义一些任务。查看 `example/tasks/tasks` 中的示例任务。去看看几个例子吧。
+
+其次，你需要使用以下命令之一来启动一个 worker 进程（推荐使用 v2，因为它不会为所有的 broker / backend 导入依赖，只导入那些你真正需要的依赖）:
+
 
 ```sh
 go run example/amqp/main.go worker
@@ -106,7 +108,7 @@ go run example/amqp/main.go worker
 go run example/redis/main.go worker
 ```
 
-You can also try v2 examples.
+您也可以尝试 v2 示例。
 
 ```sh
 cd v2/
@@ -120,7 +122,9 @@ go run example/redis/main.go worker
 
 ![Example worker][1]
 
-Finally, once you have a worker running and waiting for tasks to consume, send some tasks with one of these commands (v2 is recommended since it doesn't import dependencies for all brokers / backends, only those you actually need):
+最后，当你有一个 worker 在运行并等待任务消耗时，用以下命令发送一些任务（推荐 v2，因为它不为所有的broker / backend导入依赖，只导入那些你真正需要的依赖）:
+
+
 
 ```sh
 go run example/v2/amqp/main.go send
@@ -131,86 +135,86 @@ go run example/v1/amqp/main.go send
 go run example/v1/redis/main.go send
 ```
 
-You will be able to see the tasks being processed asynchronously by the worker:
+
+你将能够看到工作线程异步地处理任务:
 
 ![Example worker receives tasks][2]
 
 ### Configuration
 
-The [config](/v1/config/config.go) package has convenience methods for loading configuration from environment variables or a YAML file. For example, load configuration from environment variables:
+[config](/v1/config/config.go) 包提供了从环境变量或 YAML 文件加载配置的方便方法。例如，从环境变量中加载配置：
 
 ```go
 cnf, err := config.NewFromEnvironment()
 ```
 
-Or load from YAML file:
+或者从 YAML 文件加载：
 
 ```go
 cnf, err := config.NewFromYaml("config.yml", true)
 ```
 
-Second boolean flag enables live reloading of configuration every 10 seconds. Use `false` to disable live reloading.
+第二个布尔标志允许每 10 秒重新加载一次配置。使用 `false` 禁用实时重新加载。
 
-Machinery configuration is encapsulated by a `Config` struct and injected as a dependency to objects that need it.
+Machinery 配置由一个 `Config` 结构封装，并作为依赖注入到需要它的对象中。
 
 #### Lock
 
 ##### Redis
 
-Use Redis URL in one of these formats:
+使用Redis URL在以下格式之一:
 
 ```
 redis://[password@]host[port][/db_num]
 ```
 
-For example:
+例如：
 
 1. `redis://localhost:6379`, or with password `redis://password@localhost:6379`
 
 #### Broker
 
-A message broker. Currently supported brokers are:
+一个消息 broker。目前支持的 broker 有：
 
 ##### AMQP
 
-Use AMQP URL in the format:
+使用 AMQP URL 的格式：
 
 ```
 amqp://[username:password@]@host[:port]
 ```
 
-For example:
-
+例如：
 1. `amqp://guest:guest@localhost:5672`
 
-AMQP also supports multiples brokers urls. You need to specify the URL separator in the `MultipleBrokerSeparator` field.
+AMQP 还支持多个代理 url。你需要在 `MultipleBrokerSeparator` 字段中指定 URL 分隔符。
 
 ##### Redis
 
-Use Redis URL in one of these formats:
+使用 Redis URL 的格式：
 
 ```
 redis://[password@]host[port][/db_num]
 redis+socket://[password@]/path/to/file.sock[:/db_num]
 ```
 
-For example:
+例如：
 
 1. `redis://localhost:6379`, or with password `redis://password@localhost:6379`
 2. `redis+socket://password@/path/to/file.sock:/0`
 
 ##### AWS SQS
 
-Use AWS SQS URL in the format:
+使用 AWS SQS URL 的格式：
 
 ```
 https://sqs.us-east-2.amazonaws.com/123456789012
 ```
 
-See [AWS SQS docs](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html) for more information.
-Also, configuring `AWS_REGION` is required, or an error would be thrown.
+更多信息请查看 [AWS SQS docs](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)。 
+此外，还需要配置 `AWS_REGION`，否则将抛出错误。
 
-To use a manually configured SQS Client:
+要使用手动配置的 SQS 客户端：
 
 ```go
 var sqsClient = sqs.New(session.Must(session.NewSession(&aws.Config{
@@ -237,13 +241,13 @@ var cnf = &config.Config{
 
 ##### GCP Pub/Sub
 
-Use GCP Pub/Sub URL in the format:
+使用 GCP Pub/Sub URL 的格式：
 
 ```
 gcppubsub://YOUR_GCP_PROJECT_ID/YOUR_PUBSUB_SUBSCRIPTION_NAME
 ```
 
-To use a manually configured Pub/Sub Client:
+使用手动配置的发布/订阅客户端:
 
 ```go
 pubsubClient, err := pubsub.NewClient(
@@ -264,24 +268,24 @@ cnf := &config.Config{
 
 #### DefaultQueue
 
-Default queue name, e.g. `machinery_tasks`.
+默认队列名，例如： `machinery_tasks`。
 
 #### ResultBackend
 
-Result backend to use for keeping task states and results.
+用于保存任务状态和结果的结果后端。
 
-Currently supported backends are:
+目前支持的后端为：
 
 ##### Redis
 
-Use Redis URL in one of these formats:
+使用下面的 Redis URL 格式之一：
 
 ```
 redis://[password@]host[port][/db_num]
 redis+socket://[password@]/path/to/file.sock[:/db_num]
 ```
 
-For example:
+例子：
 
 1. `redis://localhost:6379`, or with password `redis://password@localhost:6379`
 2. `redis+socket://password@/path/to/file.sock:/0`
@@ -290,91 +294,94 @@ For example:
 
 ##### Memcache
 
-Use Memcache URL in the format:
+使用 Memcache URL 的格式：
 
 ```
 memcache://host1[:port1][,host2[:port2],...[,hostN[:portN]]]
 ```
 
-For example:
+例子：
 
 1. `memcache://localhost:11211` for a single instance, or
 2. `memcache://10.0.0.1:11211,10.0.0.2:11211` for a cluster
 
 ##### AMQP
 
-Use AMQP URL in the format:
+使用 AMQP URL 的格式：
 
 ```
 amqp://[username:password@]@host[:port]
 ```
 
-For example:
+例子：
 
 1. `amqp://guest:guest@localhost:5672`
 
-> Keep in mind AMQP is not recommended as a result backend. See [Keeping Results](https://github.com/RichardKnop/machinery#keeping-results)
+> 记住不推荐使用 AMQP 作为 result backend。查看 [Keeping Results](https://github.com/RichardKnop/machinery#keeping-results)
 
 ##### MongoDB
 
-Use Mongodb URL in the format:
+使用 MongoDB URL 的格式：
 
 ```
 mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
 ```
 
-For example:
+例子：
 
 1. `mongodb://localhost:27017/taskresults`
 
-See [MongoDB docs](https://docs.mongodb.org/manual/reference/connection-string/) for more information.
-
+更多信息请查看 [MongoDB docs](https://docs.mongodb.org/manual/reference/connection-string/)。
 
 #### ResultsExpireIn
 
-How long to store task results for in seconds. Defaults to `3600` (1 hour).
+将结果存储多久，单位为秒。默认为 `3600` （1 个小时）。
 
 #### AMQP
 
-RabbitMQ related configuration. Not necessary if you are using other broker/backend.
+RabbitMQ 相关的配置。如果你使用其它的  broker/backend 则不需要。
 
-* `Exchange`: exchange name, e.g. `machinery_exchange`
-* `ExchangeType`: exchange type, e.g. `direct`
-* `QueueBindingArguments`: an optional map of additional arguments used when binding to an AMQP queue
+* `Exchange`: 交换机名，例如：`machinery_exchange`
+* `ExchangeType`: 交换机类型，例如：`direct`
+* `QueueBindingArguments`: 绑定到 AMQP 队列时使用的附加参数的可选映射
 * `BindingKey`: The queue is bind to the exchange with this key, e.g. `machinery_task`
 * `PrefetchCount`: How many tasks to prefetch (set to `1` if you have long running tasks)
 
 #### DynamoDB
 
-DynamoDB related configuration. Not necessary if you are using other backend.
-* `TaskStatesTable`: Custom table name for saving task states. Default one is `task_states`, and make sure to create this table in your AWS admin first, using `TaskUUID` as table's primary key.
-* `GroupMetasTable`: Custom table name for saving group metas. Default one is `group_metas`, and make sure to create this table in your AWS admin first, using `GroupUUID` as table's primary key.
-For example:
+DynamoDB 相关的配置。如果你使用的是其它的 backend 那么不需要关心下面的东西。
+
+* `TaskStatesTable`: 保存任务状态的自定义表名。 默认是 `task_states`，确保首先在您的 AWS 管理中创建这个表，使用 `TaskUUID` 作为表的主键。
+* `GroupMetasTable`: 存组元数据的自定义表名。默认值是 `group_metas`，并确保首先在您的 AWS 管理中创建这个表，使用 `GroupUUID` 作为表的主键。
+
+例子：
 
 ```
 dynamodb:
   task_states_table: 'task_states'
   group_metas_table: 'group_metas'
 ```
-If these tables are not found, an fatal error would be thrown.
 
-If you wish to expire the records, you can configure the `TTL` field in AWS admin for these tables. The `TTL` field is set based on the `ResultsExpireIn` value in the Server's config. See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html for more information.
+如果找不到这些表，将抛出一个致命错误。
+
+如果您希望使记录过期，您可以在 AWS admin 中为这些表配置 `TTL` 字段。TTL 字段是根据服务器配置中的 `ResultsExpireIn` 值设置的。更多信息请参见 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html。
+
 
 #### Redis
 
-Redis related configuration. Not necessary if you are using other backend.
+Redis 相关的配置。如果你使用的是其它的 backend 那么不需要关心下面的东西。
 
 See: [config](/v1/config/config.go) (TODO)
 
 #### GCPPubSub
 
-GCPPubSub related configuration. Not necessary if you are using other backend.
+GCPPubSub 相关的配置。如果你使用的是其它的 backend 那么不需要关心下面的东西。
 
 See: [config](/v1/config/config.go) (TODO)
 
 ### Custom Logger
 
-You can define a custom logger by implementing the following interface:
+你可以通过实现下面的接口来自定义 logger：
 
 ```go
 type Interface interface {
@@ -392,7 +399,8 @@ type Interface interface {
 }
 ```
 
-Then just set the logger in your setup code by calling `Set` function exported by `github.com/RichardKnop/machinery/v1/log` package:
+
+然后只需在设置代码中通过调用 `github.com/RichardKnop/machinery/v1/log` 包导出的 `set` 函数来设置 logger:
 
 ```go
 log.Set(myCustomLogger)
@@ -400,7 +408,7 @@ log.Set(myCustomLogger)
 
 ### Server
 
-A Machinery library must be instantiated before use. The way this is done is by creating a `Server` instance. `Server` is a base object which stores Machinery configuration and registered tasks. E.g.:
+在使用之前，必须实例化 Machinery 库。这是通过创建一个 `Server` 实例来实现的。 `Server` 是存储 machine 配置和注册任务的基本对象。例如:
 
 ```go
 import (
@@ -427,7 +435,7 @@ if err != nil {
 
 ### Workers
 
-In order to consume tasks, you need to have one or more workers running. All you need to run a worker is a `Server` instance with registered tasks. E.g.:
+为了使用任务，您需要运行一个或多个 worker。运行 worker 所需要的只是一个带有已注册任务的 `Server` 实例。例如:
 
 ```go
 worker := server.NewWorker("worker_name", 10)
@@ -437,17 +445,17 @@ if err != nil {
 }
 ```
 
-Each worker will only consume registered tasks. For each task on the queue the Worker.Process() method will be run
-in a goroutine. Use the second parameter of `server.NewWorker` to limit the number of concurrently running Worker.Process()
-calls (per worker). Example: 1 will serialize task execution while 0 makes the number of concurrently executed tasks unlimited (default).
+每个 worker 将只使用已注册的任务。对于队列中的每个任务，Worker.Process() 方法将在 goroutine 中运行。
+使用 `server.NewWorker` 的第二个参数来限制同时运行 Worker.Process() 调用的数量(每个 worker)。
+示例：1 将序列化任务执行，而 0 将使并发执行的任务数量无限（默认）。
 
 ### Tasks
 
-Tasks are a building block of Machinery applications. A task is a function which defines what happens when a worker receives a message.
+任务是 Machinery 应用程序的组成部分。task 是一个函数，它定义了当一个 worker 接收到一条消息时会发生什么。
 
-Each task needs to return an error as a last return value. In addition to error tasks can now return any number of arguments.
+每个任务需要返回一个错误作为最后一个返回值。除了错误之外，任务现在还可以返回任意数量的参数。
 
-Examples of valid tasks:
+有效任务的例子:
 
 ```go
 func Add(args ...int64) (int64, error) {
@@ -485,7 +493,7 @@ func DummyTask2(arg1, arg2 string) (string, string, error) {
 
 #### Registering Tasks
 
-Before your workers can consume a task, you need to register it with the server. This is done by assigning a task a unique name:
+在您的 worker 使用任务之前，您需要将其注册到 server。这是通过给一个任务分配一个唯一的名称来实现的:
 
 ```go
 server.RegisterTasks(map[string]interface{}{
@@ -494,14 +502,14 @@ server.RegisterTasks(map[string]interface{}{
 })
 ```
 
-Tasks can also be registered one by one:
+任务也可以一个接一个的注册：
 
 ```go
 server.RegisterTask("add", Add)
 server.RegisterTask("multiply", Multiply)
 ```
 
-Simply put, when a worker receives a message like this:
+简单地说，当一个 worker 收到这样的信息:
 
 ```json
 {
@@ -530,25 +538,25 @@ Simply put, when a worker receives a message like this:
 }
 ```
 
-It will call Add(1, 1). Each task should return an error as well so we can handle failures.
+它将调用 Add(1,1)。每个任务也应该返回一个错误，以便我们可以处理失败。
 
-Ideally, tasks should be idempotent which means there will be no unintended consequences when a task is called multiple times with the same arguments.
+理想情况下，任务应该是幂等的，这意味着当一个任务以相同的参数被多次调用时，不会出现意想不到的结果。
 
 #### Signatures
 
-A signature wraps calling arguments, execution options (such as immutability) and success/error callbacks of a task so it can be sent across the wire to workers. Task signatures implement a simple interface:
+一个签名包装了一个任务的调用参数、执行选项(例如不变性)和成功/错误回调，因此它可以通过网络发送给 worker。任务签名实现了一个简单的接口:
 
 ```go
-// Arg represents a single argument passed to invocation fo a task
+// Arg 表示传递给任务调用的单个参数
 type Arg struct {
   Type  string
   Value interface{}
 }
 
-// Headers represents the headers which should be used to direct the task
+// Header 表示用于指导任务的头文件
 type Headers map[string]interface{}
 
-// Signature represents a single task invocation
+// Signature 表示单个任务调用
 type Signature struct {
   UUID           string
   Name           string
@@ -567,35 +575,37 @@ type Signature struct {
 }
 ```
 
-`UUID` is a unique ID of a task. You can either set it yourself or it will be automatically generated.
+`UUID` 是任务的唯一 id.你可以自己设置，也可以自动生成。
 
-`Name` is the unique task name by which it is registered against a Server instance.
+`Name` 是针对 Server 实例注册的惟一任务名称。
 
-`RoutingKey` is used for routing a task to correct queue. If you leave it empty, the default behaviour will be to set it to the default queue's binding key for direct exchange type and to the default queue name for other exchange types.
+`RoutingKey` 用于路由任务到正确的队列。如果您让它为空，默认行为将是为 direct 交换类型将它设置为默认队列的绑定键，为其他交换类型设置为默认队列名称。
 
-`ETA` is  a timestamp used for delaying a task. if it's nil, the task will be published for workers to consume immediately. If it is set, the task will be delayed until the ETA timestamp.
+`ETA` 是用于延迟任务的时间戳。如果它为 nil，任务将被发布给 worker 立即使用。如果设置了该参数，任务将被延迟到 ETA 时间戳。
 
-`GroupUUID`, `GroupTaskCount` are useful for creating groups of tasks.
+`GroupUUID`, `GroupTaskCount` 对于创建任务组很有用。                             
 
-`Args` is a list of arguments that will be passed to the task when it is executed by a worker.
+`Args` 是 worker 执行任务时将传递给该任务的参数列表。
 
-`Headers` is a list of headers that will be used when publishing the task to AMQP queue.
+`Headers` 是将任务发布到 AMQP 队列时使用的标头列表。
 
-`Immutable` is a flag which defines whether a result of the executed task can be modified or not. This is important with `OnSuccess` callbacks. Immutable task will not pass its result to its success callbacks while a mutable task will prepend its result to args sent to callback tasks. Long story short, set Immutable to false if you want to pass result of the first task in a chain to the second task.
+`Immutable` 是一个标志，它定义了执行任务的结果是否可以修改。这对于 `OnSuccess` 回调很重要。不可变任务不会将其结果传递给它的成功回调函数，而可变任务会将其结果前置到发送给回调任务的参数。
+长话短说，如果你想把链中第一个任务的结果传递给第二个任务，就把 Immutable 设为 false。
 
-`RetryCount` specifies how many times a failed task should be retried (defaults to 0). Retry attempts will be spaced out in time, after each failure another attempt will be scheduled further to the future.
+`RetryCount` 指定一个失败的任务应该重试的次数（默认为 0）。重试尝试将在时间间隔内进行，在每次失败后，将在未来安排另一个尝试。
 
-`RetryTimeout` specifies how long to wait before resending task to the queue for retry attempt. Default behaviour is to use fibonacci sequence to increase the timeout after each failed retry attempt.
+`RetryTimeout` 指定将任务重新发送到队列进行重试尝试之前要等待多长时间。默认行为是使用斐波那契序列来增加每次失败的重试尝试后的超时时间。
 
-`OnSuccess` defines tasks which will be called after the task has executed successfully. It is a slice of task signature structs.
+`OnSuccess` 定义任务成功执行后将调用的任务。它是一个任务签名结构的切片。
 
-`OnError` defines tasks which will be called after the task execution fails. The first argument passed to error callbacks will be the error string returned from the failed task.
+`OnError` 定义任务执行失败后将调用的任务。传递给错误回调函数的第一个参数是失败任务返回的错误字符串。
 
-`ChordCallback` is used to create a callback to a group of tasks.
+`ChordCallback` 用于创建对一组任务的回调。
 
 #### Supported Types
 
-Machinery encodes tasks to JSON before sending them to the broker. Task results are also stored in the backend as JSON encoded strings. Therefor only types with native JSON representation can be supported. Currently supported types are:
+Machinery 在将任务发送给代理之前将它们编码为 JSON。任务结果也作为 JSON 编码的字符串存储在后端。因此，只能支持带有原生 JSON 表示的类型。
+目前支持的类型有：
 
 * `bool`
 * `int`
@@ -628,7 +638,7 @@ Machinery encodes tasks to JSON before sending them to the broker. Task results 
 
 #### Sending Tasks
 
-Tasks can be called by passing an instance of `Signature` to an `Server` instance. E.g:
+可以通过 `Signature` 实例传递给 `Server` 实例来调用任务。例：
 
 ```go
 import (
@@ -658,7 +668,7 @@ if err != nil {
 
 #### Delayed Tasks
 
-You can delay a task by setting the `ETA` timestamp field on the task signature.
+你可以通过在任务签名上设置时间戳字段来延迟任务。
 
 ```go
 // Delay the task by 5 seconds
@@ -668,14 +678,16 @@ signature.ETA = &eta
 
 #### Retry Tasks
 
-You can set a number of retry attempts before declaring task as failed. Fibonacci sequence will be used to space out retry requests over time. (See `RetryTimeout` for details.)
+在将任务声明为失败之前，可以设置多个重试尝试。将使用斐波那契序列将重试请求随时间间隔。(详见 `RetryTimeout`。)
 
 ```go
 // If the task fails, retry it up to 3 times
 signature.RetryCount = 3
 ```
 
-Alternatively, you can return `tasks.ErrRetryTaskLater` from your task and specify duration after which the task should be retried, e.g.:
+或者，你可以从你的任务中返回 `tasks.ErrRetryTaskLater`，并指定任务应该重试的持续时间，例如：
+
+
 
 ```go
 return tasks.NewErrRetryTaskLater("some error", 4 * time.Hour)
@@ -683,17 +695,17 @@ return tasks.NewErrRetryTaskLater("some error", 4 * time.Hour)
 
 #### Get Pending Tasks
 
-Tasks currently waiting in the queue to be consumed by workers can be inspected, e.g.:
+当前在队列中等待被 worker 消耗的任务可以被检查，例如:
 
 ```go
 server.GetBroker().GetPendingTasks("some_queue")
 ```
 
-> Currently only supported by Redis broker.
+> 目前只支持 Redis broker。
 
 #### Keeping Results
 
-If you configure a result backend, the task states and results will be persisted. Possible states:
+如果配置结果后端，任务状态和结果将被持久化。可能的状态:
 
 ```go
 const (
@@ -712,16 +724,16 @@ const (
 )
 ```
 
-> When using AMQP as a result backend, task states will be persisted in separate queues for each task. Although RabbitMQ can scale up to thousands of queues, it is strongly advised to use a better suited result backend (e.g. Memcache) when you are expecting to run a large number of parallel tasks.
+> 当使用 AMQP 作为结果后端时，任务状态将持久化在每个任务的单独队列中。虽然 RabbitMQ 可以扩展到数千个队列，但当你希望运行大量并行任务时，强烈建议使用一个更适合的结果后端（例如 Memcache）。
 
 ```go
-// TaskResult represents an actual return value of a processed task
+// TaskResult 表示已处理任务的实际返回值
 type TaskResult struct {
   Type  string      `bson:"type"`
   Value interface{} `bson:"value"`
 }
 
-// TaskState represents a state of a task
+// TaskState 标识一个任务的状态
 type TaskState struct {
   TaskUUID  string        `bson:"_id"`
   State     string        `bson:"state"`
@@ -729,9 +741,9 @@ type TaskState struct {
   Error     string        `bson:"error"`
 }
 
-// GroupMeta stores useful metadata about tasks within the same group
-// E.g. UUIDs of all tasks which are used in order to check if all tasks
-// completed successfully or not and thus whether to trigger chord callback
+// GroupMeta 存储关于同一组内任务的有用元数据
+// E.g. 所有任务的 UUIDs，用于检查所有任务是否成功完成，从而是否触发回调
+  
 type GroupMeta struct {
   GroupUUID      string   `bson:"_id"`
   TaskUUIDs      []string `bson:"task_uuids"`
@@ -740,13 +752,13 @@ type GroupMeta struct {
 }
 ```
 
-`TaskResult` represents a slice of return values of a processed task.
+`TaskResult` 表示已处理任务的返回值切片。
 
-`TaskState` struct will be serialized and stored every time a task state changes.
+`TaskState` 结构将在每次任务状态更改时被序列化并存储。
 
-`GroupMeta` stores useful metadata about tasks within the same group. E.g. UUIDs of all tasks which are used in order to check if all tasks completed successfully or not and thus whether to trigger chord callback.
+`GroupMeta` 存储关于同一组内任务的有用元数据。例如，所有任务的 uuid，用于检查所有任务是否成功完成，从而是否触发回调。
 
-`AsyncResult` object allows you to check for the state of a task:
+`AsyncResult` 对象允许您检查任务的状态:
 
 ```go
 taskState := asyncResult.GetState()
@@ -754,7 +766,7 @@ fmt.Printf("Current state of %v task is:\n", taskState.TaskUUID)
 fmt.Println(taskState.State)
 ```
 
-There are couple of convenient methods to inspect the task status:
+有几种方便的方法来检查任务状态:
 
 ```go
 asyncResult.GetState().IsCompleted()
@@ -762,7 +774,7 @@ asyncResult.GetState().IsSuccess()
 asyncResult.GetState().IsFailure()
 ```
 
-You can also do a synchronous blocking call to wait for a task result:
+你也可以做一个同步阻塞调用来等待一个任务结果：
 
 ```go
 results, err := asyncResult.Get(time.Duration(time.Millisecond * 5))
@@ -777,9 +789,9 @@ for _, result := range results {
 
 #### Error Handling
 
-When a task returns with an error, the default behavior is to first attempty to retry the task if it's retriable, otherwise log the error and then eventually call any error callbacks.
+当一个任务返回一个错误时，默认的行为是首先尝试重试该任务，如果它是可重试的，否则记录错误，然后最终调用任何错误回调。
 
-To customize this, you can set a custom error handler on the worker which can do more than just logging after retries fail and error callbacks are trigerred:
+为了自定义这一点，你可以在 worker 上设置一个自定义的错误处理程序，它可以做的不仅仅是在重试失败和错误回调触发后记录日志:
 
 ```go
 worker.SetErrorHandler(func (err error) {
@@ -789,11 +801,12 @@ worker.SetErrorHandler(func (err error) {
 
 ### Workflows
 
-Running a single asynchronous task is fine but often you will want to design a workflow of tasks to be executed in an orchestrated way. There are couple of useful functions to help you design workflows.
+
+运行单个异步任务很好，但通常您会希望设计一个任务工作流，以一种精心编排的方式执行。有几个有用的函数可以帮助您设计工作流。
 
 #### Groups
 
-`Group` is a set of tasks which will be executed in parallel, independent of each other. E.g.:
+`Group` 是一组将并行执行的任务，它们彼此独立。例如:
 
 ```go
 import (
@@ -837,7 +850,7 @@ if err != nil {
 }
 ```
 
-`SendGroup` returns a slice of `AsyncResult` objects. So you can do a blocking call and wait for the result of groups tasks:
+`SendGroup` 返回一个 `AsyncResult` 对象的切片。所以你可以做一个阻塞调用，并等待组任务的结果:
 
 ```go
 for _, asyncResult := range asyncResults {
@@ -854,7 +867,7 @@ for _, asyncResult := range asyncResults {
 
 #### Chords
 
-`Chord` allows you to define a callback to be executed after all tasks in a group finished processing, e.g.:
+`Chord` 允许你定义一个回调函数，在一个组的所有任务完成后执行，例如:
 
 ```go
 import (
@@ -903,19 +916,21 @@ if err != nil {
 }
 ```
 
-The above example executes task1 and task2 in parallel, aggregates their results and passes them to task3. Therefore what would end up happening is:
+上面的示例并行执行 task1 和 task2，聚合它们的结果并将它们传递给 task3。因此最终会发生的是:
 
 ```
 multiply(add(1, 1), add(5, 5))
 ```
 
-More explicitly:
+更明确:
 
 ```
 (1 + 1) * (5 + 5) = 2 * 10 = 20
 ```
 
-`SendChord` returns `ChordAsyncResult` which follows AsyncResult's interface. So you can do a blocking call and wait for the result of the callback:
+`SendChord` 返回 `ChordAsyncResult`，它跟随 AsyncResult 的接口。所以你可以做一个阻塞调用并等待回调的结果:
+
+
 
 ```go
 results, err := chordAsyncResult.Get(time.Duration(time.Millisecond * 5))
@@ -930,7 +945,8 @@ for _, result := range results {
 
 #### Chains
 
-`Chain` is simply a set of tasks which will be executed one by one, each successful task triggering the next task in the chain. E.g.:
+
+Chain` 只是一组任务的集合，每个成功的任务都会触发链中的下一个任务。例如:
 
 ```go
 import (
@@ -984,7 +1000,7 @@ if err != nil {
 }
 ```
 
-The above example executes task1, then task2 and then task3. When a task is completed successfully, the result is appended to the end of list of arguments for the next task in the chain. Therefore what would end up happening is:
+上面的例子执行 task1，然后是 task2，然后是 task3。当一个任务成功完成时，结果被添加到链中下一个任务的参数列表的末尾。因此最终会发生的是:
 
 ```
 multiply(4, add(5, 5, add(1, 1)))
@@ -999,7 +1015,7 @@ More explicitly:
 = 48
 ```
 
-`SendChain` returns `ChainAsyncResult` which follows AsyncResult's interface. So you can do a blocking call and wait for the result of the whole chain:
+`SendChain` 返回 `ChainAsyncResult` ，它跟随 AsyncResult 的接口。所以你可以做一个阻塞调用，并等待整个链的结果:
 
 ```go
 results, err := chainAsyncResult.Get(time.Duration(time.Millisecond * 5))
@@ -1014,7 +1030,7 @@ for _, result := range results {
 
 ### Periodic Tasks & Workflows
 
-Machinery now supports scheduling periodic tasks and workflows. See examples bellow.
+Machinery 现在支持定期任务和工作流的调度。
 
 #### Periodic Tasks
 
@@ -1220,7 +1236,8 @@ docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 
 Since Go 1.11, a new recommended dependency management system is via [modules](https://github.com/golang/go/wiki/Modules).
 
-This is one of slight weaknesses of Go as dependency management is not a solved problem. Previously Go was officially recommending to use the [dep tool](https://github.com/golang/dep) but that has been abandoned now in favor of modules.
+This is one of slight weaknesses of Go as dependency management is not a solved problem. 
+Previously Go was officially recommending to use the [dep tool](https://github.com/golang/dep) but that has been abandoned now in favor of modules.
 
 #### Testing
 
