@@ -7,7 +7,7 @@ import (
 	"github.com/RichardKnop/machinery/v2/tasks"
 )
 
-// Broker - a common interface for all brokers
+// Broker - 所有 broker 的公共接口
 type Broker interface {
 	GetConfig() *config.Config
 	SetRegisteredTaskNames(names []string)
@@ -20,8 +20,8 @@ type Broker interface {
 	AdjustRoutingKey(s *tasks.Signature)
 }
 
-// TaskProcessor - can process a delivered task
-// This will probably always be a worker instance
+// TaskProcessor - 能处理交付任务
+// 这可能总是一个 worker 实例
 type TaskProcessor interface {
 	Process(signature *tasks.Signature) error
 	CustomQueue() string

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
-	
+
 	"github.com/RichardKnop/machinery/v2/backends/amqp"
 	"github.com/RichardKnop/machinery/v2/brokers/errs"
 	"github.com/RichardKnop/machinery/v2/log"
@@ -20,7 +20,7 @@ import (
 	"github.com/RichardKnop/machinery/v2/tracing"
 )
 
-// Worker represents a single worker process
+// Worker 代表一个 worker 进程
 type Worker struct {
 	server            *Server
 	ConsumerTag       string
@@ -39,8 +39,8 @@ var (
 	ErrWorkerQuitAbruptly = errors.New("Worker quit abruptly")
 )
 
-// Launch starts a new worker process. The worker subscribes
-// to the default queue and processes incoming registered tasks
+// Launch 启动一个新的 worker 进程
+// worker 订阅默认队列并处理传入的注册任务
 func (worker *Worker) Launch() error {
 	errorsChan := make(chan error)
 
@@ -49,7 +49,7 @@ func (worker *Worker) Launch() error {
 	return <-errorsChan
 }
 
-// LaunchAsync is a non blocking version of Launch
+// LaunchAsync 是非阻塞版的 Launch
 func (worker *Worker) LaunchAsync(errorsChan chan<- error) {
 	cnf := worker.server.GetConfig()
 	broker := worker.server.GetBroker()
@@ -72,7 +72,7 @@ func (worker *Worker) LaunchAsync(errorsChan chan<- error) {
 	}
 
 	var signalWG sync.WaitGroup
-	// Goroutine to start broker consumption and handle retries when broker connection dies
+	// Goroutine 用于启动 broker 消费并在 broker 连接死亡时处理重试
 	go func() {
 		for {
 			retry, err := broker.StartConsuming(worker.ConsumerTag, worker.Concurrency, worker)
@@ -95,14 +95,14 @@ func (worker *Worker) LaunchAsync(errorsChan chan<- error) {
 		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 		var signalsReceived uint
 
-		// Goroutine Handle SIGINT and SIGTERM signals
+		// Goroutine 处理 SIGINT 和 SIGTERM 信号
 		go func() {
 			for s := range sig {
 				log.WARNING.Printf("Signal received: %v", s)
 				signalsReceived++
 
 				if signalsReceived < 2 {
-					// After first Ctrl+C start quitting the worker gracefully
+					// 在第一次 Ctrl+C 开始优雅地退出 worker
 					log.WARNING.Print("Waiting for running tasks to finish before shutting down")
 					signalWG.Add(1)
 					go func() {
@@ -111,7 +111,7 @@ func (worker *Worker) LaunchAsync(errorsChan chan<- error) {
 						signalWG.Done()
 					}()
 				} else {
-					// Abort the program when user hits Ctrl+C second time in a row
+					// 当用户连续第二次按 Ctrl+C 时中止程序
 					errorsChan <- ErrWorkerQuitAbruptly
 				}
 			}
@@ -119,20 +119,20 @@ func (worker *Worker) LaunchAsync(errorsChan chan<- error) {
 	}
 }
 
-// CustomQueue returns Custom Queue of the running worker process
+// CustomQueue 返回正在运行的 worker 进程的自定义队列名
 func (worker *Worker) CustomQueue() string {
 	return worker.Queue
 }
 
-// Quit tears down the running worker process
+// Quit 停止正在运行的 worker 进程
 func (worker *Worker) Quit() {
 	worker.server.GetBroker().StopConsuming()
 }
 
-// Process handles received tasks and triggers success/error callbacks
+// Process 处理接收到的任务并触发成功/错误回调
 func (worker *Worker) Process(signature *tasks.Signature) error {
-	// If the task is not registered with this worker, do not continue
-	// but only return nil as we do not want to restart the worker process
+	// 如果这个任务没有注册到这个 worker 上，不要继续
+	// 直接返回 nil， 因为我们不想重启这个 worker process
 	if !worker.server.IsTaskRegistered(signature.Name) {
 		return nil
 	}
@@ -142,7 +142,7 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 		return nil
 	}
 
-	// Update task state to RECEIVED
+	// 更新任务状态为 RECEIVED
 	if err = worker.server.GetBackend().SetStateReceived(signature); err != nil {
 		return fmt.Errorf("Set state to 'received' for task %s returned error: %s", signature.UUID, err)
 	}
@@ -200,7 +200,7 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 	return worker.taskSucceeded(signature, results)
 }
 
-// retryTask decrements RetryCount counter and republishes the task to the queue
+// retryTask 减少 RetryCount 计数器并将任务重新发布到队列中
 func (worker *Worker) taskRetry(signature *tasks.Signature) error {
 	// Update task state to RETRY
 	if err := worker.server.GetBackend().SetStateRetry(signature); err != nil {
@@ -224,7 +224,7 @@ func (worker *Worker) taskRetry(signature *tasks.Signature) error {
 	return err
 }
 
-// taskRetryIn republishes the task to the queue with ETA of now + retryIn.Seconds()
+// taskRetryIn 将任务重新发布到队列，其 ETA 为 now + retryIn.Seconds()
 func (worker *Worker) retryTaskIn(signature *tasks.Signature, retryIn time.Duration) error {
 	// Update task state to RETRY
 	if err := worker.server.GetBackend().SetStateRetry(signature); err != nil {
@@ -242,8 +242,7 @@ func (worker *Worker) retryTaskIn(signature *tasks.Signature, retryIn time.Durat
 	return err
 }
 
-// taskSucceeded updates the task state and triggers success callbacks or a
-// chord callback if this was the last task of a group with a chord callback
+// taskSucceeded 更新任务状态，并触发成功回调或 chord 回调（如果这是具有 chord 回调的组的最后一个任务）
 func (worker *Worker) taskSucceeded(signature *tasks.Signature, taskResults []*tasks.TaskResult) error {
 	// Update task state to SUCCESS
 	if err := worker.server.GetBackend().SetStateSuccess(signature, taskResults); err != nil {
@@ -357,7 +356,7 @@ func (worker *Worker) taskSucceeded(signature *tasks.Signature, taskResults []*t
 	return nil
 }
 
-// taskFailed updates the task state and triggers error callbacks
+// taskFailed 更新任务状态，触发 error 回调
 func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) error {
 	// Update task state to FAILURE
 	if err := worker.server.GetBackend().SetStateFailure(signature, taskErr.Error()); err != nil {
@@ -388,34 +387,34 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 	return nil
 }
 
-// Returns true if the worker uses AMQP backend
+// 如果 worker 使用 AMQP backend 那么返回 true
 func (worker *Worker) hasAMQPBackend() bool {
 	_, ok := worker.server.GetBackend().(*amqp.Backend)
 	return ok
 }
 
-// SetErrorHandler sets a custom error handler for task errors
-// A default behavior is just to log the error after all the retry attempts fail
+// SetErrorHandler 为任务错误设置自定义错误处理程序
+// 默认行为是在所有重试尝试失败后记录错误
 func (worker *Worker) SetErrorHandler(handler func(err error)) {
 	worker.errorHandler = handler
 }
 
-//SetPreTaskHandler sets a custom handler func before a job is started
+// SetPreTaskHandler 设置一个自定义的处理函数 func 在作业开始之前
 func (worker *Worker) SetPreTaskHandler(handler func(*tasks.Signature)) {
 	worker.preTaskHandler = handler
 }
 
-//SetPostTaskHandler sets a custom handler for the end of a job
+// SetPostTaskHandler sets a custom handler for the end of a job
 func (worker *Worker) SetPostTaskHandler(handler func(*tasks.Signature)) {
 	worker.postTaskHandler = handler
 }
 
-//SetPreConsumeHandler sets a custom handler for the end of a job
+// SetPreConsumeHandler sets a custom handler for the end of a job
 func (worker *Worker) SetPreConsumeHandler(handler func(*Worker) bool) {
 	worker.preConsumeHandler = handler
 }
 
-//GetServer returns server
+// GetServer 返回 server
 func (worker *Worker) GetServer() *Server {
 	return worker.server
 }

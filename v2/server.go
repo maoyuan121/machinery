@@ -24,7 +24,8 @@ import (
 )
 
 // Server is the main Machinery object and stores all configuration
-// All the tasks workers process are registered against the server
+// Server 是主要的 Machinery 对象，存储所有的配置
+// 所有 task worker 进程都在 Server 上注册
 type Server struct {
 	config            *config.Config
 	registeredTasks   *sync.Map
@@ -35,7 +36,7 @@ type Server struct {
 	prePublishHandler func(*tasks.Signature)
 }
 
-// NewServer creates Server instance
+// NewServer 创建一个 Server 实例
 func NewServer(cnf *config.Config, brokerServer brokersiface.Broker, backendServer backendsiface.Backend, lock lockiface.Lock) *Server {
 	srv := &Server{
 		config:          cnf,
@@ -46,13 +47,13 @@ func NewServer(cnf *config.Config, brokerServer brokersiface.Broker, backendServ
 		scheduler:       cron.New(),
 	}
 
-	// Run scheduler job
+	// 运行 scheduler job
 	go srv.scheduler.Run()
 
 	return srv
 }
 
-// NewWorker creates Worker instance
+// NewWorker 创建一个 Worker 实例
 func (server *Server) NewWorker(consumerTag string, concurrency int) *Worker {
 	return &Worker{
 		server:      server,
@@ -62,7 +63,7 @@ func (server *Server) NewWorker(consumerTag string, concurrency int) *Worker {
 	}
 }
 
-// NewCustomQueueWorker creates Worker instance with Custom Queue
+// NewCustomQueueWorker 使用自定义队列创建一个 Worker 实例
 func (server *Server) NewCustomQueueWorker(consumerTag string, concurrency int, queue string) *Worker {
 	return &Worker{
 		server:      server,
@@ -72,42 +73,42 @@ func (server *Server) NewCustomQueueWorker(consumerTag string, concurrency int, 
 	}
 }
 
-// GetBroker returns broker
+// GetBroker 返回 broker
 func (server *Server) GetBroker() brokersiface.Broker {
 	return server.broker
 }
 
-// SetBroker sets broker
+// SetBroker 设置 broker
 func (server *Server) SetBroker(broker brokersiface.Broker) {
 	server.broker = broker
 }
 
-// GetBackend returns backend
+// GetBackend 返回 backend
 func (server *Server) GetBackend() backendsiface.Backend {
 	return server.backend
 }
 
-// SetBackend sets backend
+// SetBackend 设置 backend
 func (server *Server) SetBackend(backend backendsiface.Backend) {
 	server.backend = backend
 }
 
-// GetConfig returns connection object
+// GetConfig 返回一个 config
 func (server *Server) GetConfig() *config.Config {
 	return server.config
 }
 
-// SetConfig sets config
+// SetConfig 设置 config
 func (server *Server) SetConfig(cnf *config.Config) {
 	server.config = cnf
 }
 
-// SetPreTaskHandler Sets pre publish handler
+// SetPreTaskHandler 设置每个 publish handler（在发布前触发）
 func (server *Server) SetPreTaskHandler(handler func(*tasks.Signature)) {
 	server.prePublishHandler = handler
 }
 
-// RegisterTasks registers all tasks at once
+// RegisterTasks 一次注册所有的 task
 func (server *Server) RegisterTasks(namedTaskFuncs map[string]interface{}) error {
 	for _, task := range namedTaskFuncs {
 		if err := tasks.ValidateTask(task); err != nil {
@@ -121,7 +122,7 @@ func (server *Server) RegisterTasks(namedTaskFuncs map[string]interface{}) error
 	return nil
 }
 
-// RegisterTask registers a single task
+// RegisterTask 注册一个 task
 func (server *Server) RegisterTask(name string, taskFunc interface{}) error {
 	if err := tasks.ValidateTask(taskFunc); err != nil {
 		return err
@@ -131,13 +132,13 @@ func (server *Server) RegisterTask(name string, taskFunc interface{}) error {
 	return nil
 }
 
-// IsTaskRegistered returns true if the task name is registered with this broker
+// IsTaskRegistered 如果一个 task 名已经注册过了，返回 true
 func (server *Server) IsTaskRegistered(name string) bool {
 	_, ok := server.registeredTasks.Load(name)
 	return ok
 }
 
-// GetRegisteredTask returns registered task by name
+// GetRegisteredTask 根据名字返回已注册的  task
 func (server *Server) GetRegisteredTask(name string) (interface{}, error) {
 	taskFunc, ok := server.registeredTasks.Load(name)
 	if !ok {
@@ -146,7 +147,7 @@ func (server *Server) GetRegisteredTask(name string) (interface{}, error) {
 	return taskFunc, nil
 }
 
-// SendTaskWithContext will inject the trace context in the signature headers before publishing it
+// SendTaskWithContext 将在发布之前注入跟踪上下文到 signature header
 func (server *Server) SendTaskWithContext(ctx context.Context, signature *tasks.Signature) (*result.AsyncResult, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendTask", tracing.ProducerOption(), tracing.MachineryTag)
 	defer span.Finish()
@@ -159,13 +160,13 @@ func (server *Server) SendTaskWithContext(ctx context.Context, signature *tasks.
 		return nil, errors.New("Result backend required")
 	}
 
-	// Auto generate a UUID if not set already
+	// 如果没有设置 UUID 那么自动生成一个
 	if signature.UUID == "" {
 		taskID := uuid.New().String()
 		signature.UUID = fmt.Sprintf("task_%v", taskID)
 	}
 
-	// Set initial task state to PENDING
+	// 设置初始 task 状态为 PENDING
 	if err := server.backend.SetStatePending(signature); err != nil {
 		return nil, fmt.Errorf("Set state pending error: %s", err)
 	}
@@ -181,12 +182,12 @@ func (server *Server) SendTaskWithContext(ctx context.Context, signature *tasks.
 	return result.NewAsyncResult(signature, server.backend), nil
 }
 
-// SendTask publishes a task to the default queue
+// SendTask 发布一个 task 到默认的队列
 func (server *Server) SendTask(signature *tasks.Signature) (*result.AsyncResult, error) {
 	return server.SendTaskWithContext(context.Background(), signature)
 }
 
-// SendChainWithContext will inject the trace context in all the signature headers before publishing it
+// SendChainWithContext 在发布前会把 trace context 注入到所有的 signature header 上
 func (server *Server) SendChainWithContext(ctx context.Context, chain *tasks.Chain) (*result.ChainAsyncResult, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendChain", tracing.ProducerOption(), tracing.MachineryTag, tracing.WorkflowChainTag)
 	defer span.Finish()
@@ -196,7 +197,7 @@ func (server *Server) SendChainWithContext(ctx context.Context, chain *tasks.Cha
 	return server.SendChain(chain)
 }
 
-// SendChain triggers a chain of tasks
+// SendChain 触发一系列的任务
 func (server *Server) SendChain(chain *tasks.Chain) (*result.ChainAsyncResult, error) {
 	_, err := server.SendTask(chain.Tasks[0])
 	if err != nil {
@@ -206,7 +207,7 @@ func (server *Server) SendChain(chain *tasks.Chain) (*result.ChainAsyncResult, e
 	return result.NewChainAsyncResult(chain.Tasks, server.backend), nil
 }
 
-// SendGroupWithContext will inject the trace context in all the signature headers before publishing it
+// SendGroupWithContext 在发布前会把 trace context 注入到所有的 signature header 上
 func (server *Server) SendGroupWithContext(ctx context.Context, group *tasks.Group, sendConcurrency int) ([]*result.AsyncResult, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendGroup", tracing.ProducerOption(), tracing.MachineryTag, tracing.WorkflowGroupTag)
 	defer span.Finish()
@@ -282,12 +283,12 @@ func (server *Server) SendGroupWithContext(ctx context.Context, group *tasks.Gro
 	}
 }
 
-// SendGroup triggers a group of parallel tasks
+// SendGroup 触发一组并发的 task
 func (server *Server) SendGroup(group *tasks.Group, sendConcurrency int) ([]*result.AsyncResult, error) {
 	return server.SendGroupWithContext(context.Background(), group, sendConcurrency)
 }
 
-// SendChordWithContext will inject the trace context in all the signature headers before publishing it
+// SendChordWithContext 在发布前会把 trace context 注入到所有的 signature header 上
 func (server *Server) SendChordWithContext(ctx context.Context, chord *tasks.Chord, sendConcurrency int) (*result.ChordAsyncResult, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendChord", tracing.ProducerOption(), tracing.MachineryTag, tracing.WorkflowChordTag)
 	defer span.Finish()
@@ -306,12 +307,12 @@ func (server *Server) SendChordWithContext(ctx context.Context, chord *tasks.Cho
 	), nil
 }
 
-// SendChord triggers a group of parallel tasks with a callback
+// SendChord 使用回调触发一组并行任务
 func (server *Server) SendChord(chord *tasks.Chord, sendConcurrency int) (*result.ChordAsyncResult, error) {
 	return server.SendChordWithContext(context.Background(), chord, sendConcurrency)
 }
 
-// GetRegisteredTaskNames returns slice of registered task names
+// GetRegisteredTaskNames 返回已经注册的任务名切片
 func (server *Server) GetRegisteredTaskNames() []string {
 	taskNames := make([]string, 0)
 
@@ -322,7 +323,7 @@ func (server *Server) GetRegisteredTaskNames() []string {
 	return taskNames
 }
 
-// RegisterPeriodicTask register a periodic task which will be triggered periodically
+// RegisterPeriodicTask 注册一个定期触发的任务
 func (server *Server) RegisterPeriodicTask(spec, name string, signature *tasks.Signature) error {
 	//check spec
 	schedule, err := cron.ParseStandard(spec)
@@ -348,7 +349,7 @@ func (server *Server) RegisterPeriodicTask(spec, name string, signature *tasks.S
 	return err
 }
 
-// RegisterPeriodicChain register a periodic chain which will be triggered periodically
+// RegisterPeriodicChain 注册一个定期触发的 chain
 func (server *Server) RegisterPeriodicChain(spec, name string, signatures ...*tasks.Signature) error {
 	//check spec
 	schedule, err := cron.ParseStandard(spec)
@@ -377,7 +378,7 @@ func (server *Server) RegisterPeriodicChain(spec, name string, signatures ...*ta
 	return err
 }
 
-// RegisterPeriodicGroup register a periodic group which will be triggered periodically
+// RegisterPeriodicGroup 注册一个定期触发的 group
 func (server *Server) RegisterPeriodicGroup(spec, name string, sendConcurrency int, signatures ...*tasks.Signature) error {
 	//check spec
 	schedule, err := cron.ParseStandard(spec)
@@ -406,7 +407,7 @@ func (server *Server) RegisterPeriodicGroup(spec, name string, sendConcurrency i
 	return err
 }
 
-// RegisterPeriodicChord register a periodic chord which will be triggered periodically
+// RegisterPeriodicChord 注册一个定期触发的 chord
 func (server *Server) RegisterPeriodicChord(spec, name string, sendConcurrency int, callback *tasks.Signature, signatures ...*tasks.Signature) error {
 	//check spec
 	schedule, err := cron.ParseStandard(spec)
