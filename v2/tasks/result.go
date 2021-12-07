@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// TaskResult represents an actual return value of a processed task
+// TaskResult 表示已处理任务的实际返回值
 type TaskResult struct {
 	Type  string      `bson:"type"`
 	Value interface{} `bson:"value"`

@@ -71,7 +71,7 @@ func (b *Backend) GroupCompleted(groupUUID string, groupTaskCount int) (bool, er
 	return countSuccessTasks == groupTaskCount, nil
 }
 
-// GroupTaskStates returns states of all tasks in the group
+// GroupTaskStates 返回一个组里面所有任务的状态
 func (b *Backend) GroupTaskStates(groupUUID string, groupTaskCount int) ([]*tasks.TaskState, error) {
 	groupMeta, err := b.getGroupMeta(groupUUID)
 	if err != nil {
@@ -126,43 +126,43 @@ func (b *Backend) TriggerChord(groupUUID string) (bool, error) {
 	return true, nil
 }
 
-// SetStatePending updates task state to PENDING
+// SetStatePending 更新任务状态为 PENDING
 func (b *Backend) SetStatePending(signature *tasks.Signature) error {
 	taskState := tasks.NewPendingTaskState(signature)
 	return b.updateState(taskState)
 }
 
-// SetStateReceived updates task state to RECEIVED
+// SetStateReceived 更新任务状态为  RECEIVED
 func (b *Backend) SetStateReceived(signature *tasks.Signature) error {
 	taskState := tasks.NewReceivedTaskState(signature)
 	return b.updateState(taskState)
 }
 
-// SetStateStarted updates task state to STARTED
+// SetStateStarted 更新任务状态为 STARTED
 func (b *Backend) SetStateStarted(signature *tasks.Signature) error {
 	taskState := tasks.NewStartedTaskState(signature)
 	return b.updateState(taskState)
 }
 
-// SetStateRetry updates task state to RETRY
+// SetStateRetry 更新任务状态为 RETRY
 func (b *Backend) SetStateRetry(signature *tasks.Signature) error {
 	state := tasks.NewRetryTaskState(signature)
 	return b.updateState(state)
 }
 
-// SetStateSuccess updates task state to SUCCESS
+// SetStateSuccess 更新任务状态为 SUCCESS
 func (b *Backend) SetStateSuccess(signature *tasks.Signature, results []*tasks.TaskResult) error {
 	taskState := tasks.NewSuccessTaskState(signature, results)
 	return b.updateState(taskState)
 }
 
-// SetStateFailure updates task state to FAILURE
+// SetStateFailure 更新任务状态为 FAILURE
 func (b *Backend) SetStateFailure(signature *tasks.Signature, err string) error {
 	taskState := tasks.NewFailureTaskState(signature, err)
 	return b.updateState(taskState)
 }
 
-// GetState returns the latest task state
+// GetState 返回最新的任务状态
 func (b *Backend) GetState(taskUUID string) (*tasks.TaskState, error) {
 	item, err := b.getClient().Get(taskUUID)
 	if err != nil {
@@ -179,17 +179,17 @@ func (b *Backend) GetState(taskUUID string) (*tasks.TaskState, error) {
 	return state, nil
 }
 
-// PurgeState deletes stored task state
+// PurgeState 删除存储的任务状态
 func (b *Backend) PurgeState(taskUUID string) error {
 	return b.getClient().Delete(taskUUID)
 }
 
-// PurgeGroupMeta deletes stored group meta data
+// PurgeGroupMeta 删除存储的  group meta data
 func (b *Backend) PurgeGroupMeta(groupUUID string) error {
 	return b.getClient().Delete(groupUUID)
 }
 
-// updateState saves current task state
+// updateState 保存当前的任务状态
 func (b *Backend) updateState(taskState *tasks.TaskState) error {
 	encoded, err := json.Marshal(taskState)
 	if err != nil {
@@ -203,7 +203,7 @@ func (b *Backend) updateState(taskState *tasks.TaskState) error {
 	})
 }
 
-// lockGroupMeta acquires lock on group meta data
+// lockGroupMeta 获取  group meta data 上的锁
 func (b *Backend) lockGroupMeta(groupMeta *tasks.GroupMeta) error {
 	groupMeta.Lock = true
 	encoded, err := json.Marshal(groupMeta)
@@ -218,7 +218,7 @@ func (b *Backend) lockGroupMeta(groupMeta *tasks.GroupMeta) error {
 	})
 }
 
-// unlockGroupMeta releases lock on group meta data
+// unlockGroupMeta 释放在 group meta data 上的锁
 func (b *Backend) unlockGroupMeta(groupMeta *tasks.GroupMeta) error {
 	groupMeta.Lock = false
 	encoded, err := json.Marshal(groupMeta)
@@ -250,7 +250,7 @@ func (b *Backend) getGroupMeta(groupUUID string) (*tasks.GroupMeta, error) {
 	return groupMeta, nil
 }
 
-// getStates returns multiple task states
+// getStates 返回多个任务状态
 func (b *Backend) getStates(taskUUIDs ...string) ([]*tasks.TaskState, error) {
 	states := make([]*tasks.TaskState, len(taskUUIDs))
 
@@ -273,7 +273,7 @@ func (b *Backend) getStates(taskUUIDs ...string) ([]*tasks.TaskState, error) {
 	return states, nil
 }
 
-// getExpirationTimestamp returns expiration timestamp
+// getExpirationTimestamp 返回过期时间戳
 func (b *Backend) getExpirationTimestamp() int32 {
 	expiresIn := b.GetConfig().ResultsExpireIn
 	if expiresIn == 0 {
@@ -283,7 +283,8 @@ func (b *Backend) getExpirationTimestamp() int32 {
 	return int32(time.Now().Unix() + int64(expiresIn))
 }
 
-// getClient returns or creates instance of Memcache client
+
+// getClient 返回或者创建一个 Memcache client 实例
 func (b *Backend) getClient() *gomemcache.Client {
 	if b.client == nil {
 		b.client = gomemcache.New(b.servers...)

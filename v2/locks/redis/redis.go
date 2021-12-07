@@ -93,8 +93,8 @@ func (r Lock) Lock(key string, unixTsToExpireNs int64) error {
 			}
 
 			if now > int64(curTimeout) {
-				// success to acquire lock with get set
-				// set the expiration of redis key
+				// 使用 get set 成功获得锁
+				// 设置 redis key  的过期时间
 				r.rclient.Expire(ctx, key, expiration)
 				return nil
 			}

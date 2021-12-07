@@ -414,10 +414,10 @@ func (b *Broker) isDirectExchange() bool {
 	return b.GetConfig().AMQP != nil && b.GetConfig().AMQP.ExchangeType == "direct"
 }
 
-// AdjustRoutingKey makes sure the routing key is correct.
-// If the routing key is an empty string:
-// a) set it to binding key for direct exchange type
-// b) set it to default queue name
+// AdjustRoutingKey 确保 routing key 是正确的。
+// 如果 routing key 是空字符串：
+// a) 如果 exchange type 是 direct，那么设置为  binding key
+// b) 设置为默认的队名名
 func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 	if s.RoutingKey != "" {
 		return

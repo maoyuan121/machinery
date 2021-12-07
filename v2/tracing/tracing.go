@@ -18,14 +18,13 @@ var (
 	WorkflowChainTag = opentracing.Tag{Key: "machinery.workflow", Value: "chain"}
 )
 
-// StartSpanFromHeaders will extract a span from the signature headers
-// and start a new span with the given operation name.
+// StartSpanFromHeaders 将从签名头中提取一个 span，并使用给定的操作名开始一个新的 span
 func StartSpanFromHeaders(headers tasks.Headers, operationName string) opentracing.Span {
-	// Try to extract the span context from the carrier.
+	// 尝试从载体中提取 span 上下文
 	spanContext, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, headers)
 
-	// Create a new span from the span context if found or start a new trace with the function name.
-	// For clarity add the machinery component tag.
+	// 如果找到 span 上下文，则从 span 上下文创建一个新的 span，或者使用函数名启动一个新的跟踪。
+	// 为清晰起见，添加 macheinery 组件标签。
 	span := opentracing.StartSpan(
 		operationName,
 		ConsumerOption(spanContext),
@@ -40,7 +39,7 @@ func StartSpanFromHeaders(headers tasks.Headers, operationName string) opentraci
 	return span
 }
 
-// HeadersWithSpan will inject a span into the signature headers
+// HeadersWithSpan 将注入一个 span 到 signature header 中
 func HeadersWithSpan(headers tasks.Headers, span opentracing.Span) tasks.Headers {
 	// check if the headers aren't nil
 	if headers == nil {

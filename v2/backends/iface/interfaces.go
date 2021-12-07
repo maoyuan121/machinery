@@ -4,15 +4,15 @@ import (
 	"github.com/RichardKnop/machinery/v2/tasks"
 )
 
-// Backend - a common interface for all result backends
+// Backend - 用于所有结果后端的公共接口
 type Backend interface {
-	// Group related functions
+	// Group 相关的函数
 	InitGroup(groupUUID string, taskUUIDs []string) error
 	GroupCompleted(groupUUID string, groupTaskCount int) (bool, error)
 	GroupTaskStates(groupUUID string, groupTaskCount int) ([]*tasks.TaskState, error)
 	TriggerChord(groupUUID string) (bool, error)
 
-	// Setting / getting task state
+	// 获取/设置任务状态
 	SetStatePending(signature *tasks.Signature) error
 	SetStateReceived(signature *tasks.Signature) error
 	SetStateStarted(signature *tasks.Signature) error
@@ -21,7 +21,7 @@ type Backend interface {
 	SetStateFailure(signature *tasks.Signature, err string) error
 	GetState(taskUUID string) (*tasks.TaskState, error)
 
-	// Purging stored stored tasks states and group meta data
+	// 清除存储的存储任务状态和组元数据
 	IsAMQP() bool
 	PurgeState(taskUUID string) error
 	PurgeGroupMeta(groupUUID string) error

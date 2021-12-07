@@ -30,7 +30,7 @@ type signatureCtxType struct{}
 
 var signatureCtx signatureCtxType
 
-// SignatureFromContext gets the signature from the context
+// SignatureFromContext 从 context 中获取 signature
 func SignatureFromContext(ctx context.Context) *Signature {
 	if ctx == nil {
 		return nil

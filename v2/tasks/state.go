@@ -3,21 +3,21 @@ package tasks
 import "time"
 
 const (
-	// StatePending - initial state of a task
+	// StatePending - 任务的初始状态
 	StatePending = "PENDING"
-	// StateReceived - when task is received by a worker
+	// StateReceived - 当一个任务被 worker 接收了
 	StateReceived = "RECEIVED"
-	// StateStarted - when the worker starts processing the task
+	// StateStarted - 当 worker 开始处理这个任务
 	StateStarted = "STARTED"
-	// StateRetry - when failed task has been scheduled for retry
+	// StateRetry - 当失败的任务被调度为重试
 	StateRetry = "RETRY"
-	// StateSuccess - when the task is processed successfully
+	// StateSuccess - 当任务被成功处理
 	StateSuccess = "SUCCESS"
-	// StateFailure - when processing of the task fails
+	// StateFailure - 任务处理失败
 	StateFailure = "FAILURE"
 )
 
-// TaskState represents a state of a task
+// TaskState 标识一个任务的状态
 type TaskState struct {
 	TaskUUID  string        `bson:"_id"`
 	TaskName  string        `bson:"task_name"`
@@ -28,7 +28,7 @@ type TaskState struct {
 	TTL       int64         `bson:"ttl,omitempty"`
 }
 
-// GroupMeta stores useful metadata about tasks within the same group
+// GroupMeta 存储同一组里面任务的 metadata
 // E.g. UUIDs of all tasks which are used in order to check if all tasks
 // completed successfully or not and thus whether to trigger chord callback
 type GroupMeta struct {

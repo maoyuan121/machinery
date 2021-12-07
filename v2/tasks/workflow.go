@@ -6,19 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
-// Chain creates a chain of tasks to be executed one after another
+// Chain 创建了一个任务链，任务一个接一个的执行
 type Chain struct {
 	Tasks []*Signature
 }
 
 // Group creates a set of tasks to be executed in parallel
+// Group 创建了一个任务集合，这些任务会被并发的执行
 type Group struct {
 	GroupUUID string
 	Tasks     []*Signature
 }
 
-// Chord adds an optional callback to the group to be executed
-// after all tasks in the group finished
+// Chord 添加了一个回调到  group，当 group 里面的任务都执行完了执行这个回调
 type Chord struct {
 	Group    *Group
 	Callback *Signature

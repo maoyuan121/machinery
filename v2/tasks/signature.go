@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Arg represents a single argument passed to invocation fo a task
+// Arg 表示传递给任务调用的单个参数
 type Arg struct {
 	Name  string      `bson:"name"`
 	Type  string      `bson:"type"`
@@ -18,12 +18,12 @@ type Arg struct {
 // Headers represents the headers which should be used to direct the task
 type Headers map[string]interface{}
 
-// Set on Headers implements opentracing.TextMapWriter for trace propagation
+// Set on Headers 实现 open tracing.TextMapWriter 用于 trace propagation
 func (h Headers) Set(key, val string) {
 	h[key] = val
 }
 
-// ForeachKey on Headers implements opentracing.TextMapReader for trace propagation.
+// ForeachKey on Headers 实现 open tracing.TextMapWriter 用于 trace propagation
 // It is essentially the same as the opentracing.TextMapReader implementation except
 // for the added casting from interface{} to string.
 func (h Headers) ForeachKey(handler func(key, val string) error) error {
@@ -42,7 +42,7 @@ func (h Headers) ForeachKey(handler func(key, val string) error) error {
 	return nil
 }
 
-// Signature represents a single task invocation
+// Signature 表示单个任务调用
 type Signature struct {
 	UUID           string
 	Name           string
