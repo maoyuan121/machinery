@@ -277,7 +277,7 @@ func (b *Backend) getStates(taskUUIDs ...string) ([]*tasks.TaskState, error) {
 func (b *Backend) getExpirationTimestamp() int32 {
 	expiresIn := b.GetConfig().ResultsExpireIn
 	if expiresIn == 0 {
-		// // expire results after 1 hour by default
+		// // 默认一个小时过期
 		expiresIn = config.DefaultResultsExpireIn
 	}
 	return int32(time.Now().Unix() + int64(expiresIn))
